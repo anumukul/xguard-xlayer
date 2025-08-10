@@ -6,20 +6,18 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    const sp = req.nextUrl.searchParams;
-    const chainId = sp.get("chainId");
-    const fromTokenAddress = sp.get("fromTokenAddress");
-    const toTokenAddress = sp.get("toTokenAddress");
-    const amount = sp.get("amount");
-    const slippage = sp.get("slippage") ?? "50"; 
+    const { searchParams } = new URL(req.url);
+    const chainId = searchParams.get("chainId") ?? "195";
+    const fromTokenAddress = searchParams.get("fromTokenAddress");
+    const toTokenAddress = searchParams.get("toTokenAddress");
+    const amount = searchParams.get("amount");
+    const slippage = searchParams.get("slippage") ?? "50";
 
-    if (!chainId || !fromTokenAddress || !toTokenAddress || !amount) {
-      return NextResponse.json(
-        { error: "Missing required query params: chainId, fromTokenAddress, toTokenAddress, amount" },
-        { status: 400 }
-      );
+    if (!fromTokenAddress || !toTokenAddress || !amount) {
+      return NextResponse.json({ error: "Missing params" }, { status: 400 });
     }
 
+   
     const data = await okxGet("/dex/aggregator/quote", {
       chainId,
       fromTokenAddress,
@@ -30,6 +28,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(data, { status: 200 });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Unknown error" }, { status: 500 });
+    return NextResponse.json({ error: e?.message || "Quote failed" }, { status: 500 });
   }
 }

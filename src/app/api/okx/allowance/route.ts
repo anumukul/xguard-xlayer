@@ -9,18 +9,17 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const chainId = searchParams.get("chainId");
     const tokenContractAddress = searchParams.get("tokenContractAddress");
-    const amount = searchParams.get("amount");
     const owner = searchParams.get("owner");
     const spender = searchParams.get("spender");
-    if (!chainId || !tokenContractAddress || !amount || !owner || !spender) {
+    if (!chainId || !tokenContractAddress || !owner || !spender) {
       return NextResponse.json({ error: "Missing params" }, { status: 400 });
     }
 
-    const data = await okxGet("/dex/aggregator/approve/transaction", {
-      chainId, tokenContractAddress, amount, owner, spender,
+    const data = await okxGet("/dex/aggregator/approve/allowance", {
+      chainId, tokenContractAddress, owner, spender,
     });
     return NextResponse.json(data, { status: 200 });
   } catch (e: any) {
-    return NextResponse.json({ error: e?.message || "Approve tx failed" }, { status: 500 });
+    return NextResponse.json({ error: e?.message || "Allowance failed" }, { status: 500 });
   }
 }
